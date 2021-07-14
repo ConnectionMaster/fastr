@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,8 +35,10 @@ import com.oracle.truffle.r.runtime.data.VectorDataLibrary.SeqIterator;
 import com.oracle.truffle.r.runtime.data.VectorDataLibrary.SeqWriteIterator;
 import com.oracle.truffle.r.runtime.ops.na.NACheck;
 
+import java.util.Arrays;
+
 @ExportLibrary(VectorDataLibrary.class)
-public class RStringCharSXPData {
+public class RStringCharSXPData implements ShareableVectorData {
     private final CharSXPWrapper[] data;
 
     public RStringCharSXPData(CharSXPWrapper[] data) {
@@ -45,14 +47,6 @@ public class RStringCharSXPData {
 
     public CharSXPWrapper[] getData() {
         return data;
-    }
-
-    public CharSXPWrapper getWrappedAt(int index) {
-        return data[index];
-    }
-
-    public void setWrappedAt(int index, CharSXPWrapper value) {
-        data[index] = value;
     }
 
     @ExportMessage
@@ -76,6 +70,11 @@ public class RStringCharSXPData {
     }
 
     @ExportMessage
+    public RStringCharSXPData materializeCharSXPStorage() {
+        return this;
+    }
+
+    @ExportMessage
     public boolean isWriteable() {
         return true;
     }
@@ -94,6 +93,11 @@ public class RStringCharSXPData {
             result[i] = data[i].getContents();
         }
         return result;
+    }
+
+    @ExportMessage
+    public CharSXPWrapper[] getCharSXPDataCopy() {
+        return Arrays.copyOf(data, data.length);
     }
 
     // Data access:
@@ -140,6 +144,21 @@ public class RStringCharSXPData {
         return data[index].getContents();
     }
 
+    @ExportMessage
+    public CharSXPWrapper getCharSXPAt(int index) {
+        return data[index];
+    }
+
+    @ExportMessage
+    public CharSXPWrapper getNextCharSXP(SeqIterator it) {
+        return data[it.getIndex()];
+    }
+
+    @ExportMessage
+    public CharSXPWrapper getCharSXP(@SuppressWarnings("unused") RandomAccessIterator it, int index) {
+        return data[index];
+    }
+
     // Write access to the elements:
 
     @ExportMessage
@@ -165,5 +184,20 @@ public class RStringCharSXPData {
     @ExportMessage
     public void setString(@SuppressWarnings("unused") RandomAccessWriteIterator it, int index, String value) {
         data[index] = CharSXPWrapper.create(value);
+    }
+
+    @ExportMessage
+    public void setCharSXPAt(int index, CharSXPWrapper value) {
+        data[index] = value;
+    }
+
+    @ExportMessage
+    public void setNextCharSXP(SeqWriteIterator it, CharSXPWrapper value) {
+        data[it.getIndex()] = value;
+    }
+
+    @ExportMessage
+    public void setCharSXP(@SuppressWarnings("unused") RandomAccessWriteIterator it, int index, CharSXPWrapper value) {
+        data[index] = value;
     }
 }

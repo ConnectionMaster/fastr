@@ -22,10 +22,6 @@
  */
 package com.oracle.truffle.r.runtime.data;
 
-import static com.oracle.truffle.r.runtime.data.model.RAbstractVector.ENABLE_COMPLETE;
-
-import java.util.Arrays;
-
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Cached.Shared;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -43,8 +39,12 @@ import com.oracle.truffle.r.runtime.data.VectorDataLibrary.SeqIterator;
 import com.oracle.truffle.r.runtime.data.VectorDataLibrary.SeqWriteIterator;
 import com.oracle.truffle.r.runtime.ops.na.NACheck;
 
+import java.util.Arrays;
+
+import static com.oracle.truffle.r.runtime.data.model.RAbstractVector.ENABLE_COMPLETE;
+
 @ExportLibrary(VectorDataLibrary.class)
-class RStringArrayVectorData implements TruffleObject {
+class RStringArrayVectorData implements TruffleObject, ShareableVectorData {
     private final String[] data;
     private boolean complete;
 
@@ -82,6 +82,11 @@ class RStringArrayVectorData implements TruffleObject {
     @ExportMessage
     public RStringArrayVectorData materialize() {
         return this;
+    }
+
+    @ExportMessage
+    public RStringCharSXPData materializeCharSXPStorage() {
+        return wrapStrings();
     }
 
     @ExportMessage

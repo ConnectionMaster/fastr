@@ -36,6 +36,7 @@ import mx_unittest
 import os
 import shutil
 
+
 '''
 This is the launchpad for all the functions available for building/running/testing/analyzing
 FastR. FastR can run with or without the Graal compiler enabled. As a convenience if the
@@ -115,11 +116,6 @@ def do_run_r(args, command, extraVmArgs=None, jdk=None, **kwargs):
     if command:
         vmArgs.extend(_command_class_dict[command.lower()])
     return mx.run_java(vmArgs + args, jdk=jdk, **kwargs)
-
-def run_grid_server(args, **kwargs):
-    vmArgs = mx.get_runtime_jvm_args(['GRID_DEVICE_REMOTE_SERVER'], jdk=get_default_jdk())
-    vmArgs.append('com.oracle.truffle.r.library.fastrGrid.device.remote.server.RemoteDeviceServer')
-    return mx.run_java(vmArgs + args, jdk=get_default_jdk(), **kwargs)
 
 def r_classpath(args):
     print(mx.classpath('FASTR', jdk=mx.get_jdk()) + ":" + mx.classpath('SULONG_NATIVE', jdk=mx.get_jdk()))  # pylint: disable=superfluous-parens
@@ -771,7 +767,6 @@ def nativebuild(args):
 
 
 def mx_post_parse_cmd_line(opts):
-    mx_fastr_dists.mx_post_parse_cmd_line(opts)
     mx_subst.results_substitutions.register_no_arg('graalvm_version', mx.suite('sdk').release_version())
     if mx.suite("sulong", fatalIfMissing=False) and not _fastr_suite.isBinarySuite():
         # native.recommended runs FastR, it already has a build dependency to the FASTR distribution
@@ -903,9 +898,13 @@ def build_binary_pkgs(args_in, **kwargs):
         pkgcache(['--print-api-checksum', '--vm', 'fastr'])
     finally:
         sys.stdout = sys.__stdout__
+    checksum_lines = string_io.getvalue().splitlines(keepends=False)
+    mx.log("===== Output of 'mx r-pkgcache --print-api-checksum --vm fastr': =====")
+    mx.log(string_io.getvalue())
+    mx.log("===== End of output of 'mx r-pkgcache --print-api-checksum --vm fastr' =====")
     with open(os.path.join(pkgs_path, 'api-checksum.txt'), 'w') as f:
-        checksum = string_io.getvalue().splitlines(keepends=False)[-1]
-        print(checksum, f)
+        checksum = checksum_lines[-1]
+        f.write(checksum + "\n")
     # creates the tarball
     result_tarball = os.path.join(dest_dir, pkgs_name + '.tar.gz')
     with tarfile.open(result_tarball, "w:gz") as tar:
@@ -918,7 +917,7 @@ def build_binary_pkgs(args_in, **kwargs):
 
 COPYRIGHT_HEADER_GPL3 = """\
 /*
- * Copyright (c) 2013, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -965,7 +964,6 @@ _commands = {
     'R' : [rshell, '[options]'],
     'rscript' : [rscript, '[options]'],
     'Rscript' : [rscript, '[options]'],
-    'gridserver' : [run_grid_server, ''],
     'rtestgen' : [testgen, ''],
     'rgate' : [rgate, ''],
     'rutsimple' : [ut_simple, ['options']],

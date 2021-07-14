@@ -9,7 +9,7 @@ suite = {
                "subdir" : True,
                # The version must be the same as the version of Sulong
                # TRUFFLE REVISION (note: this is a marker for script that can update this)
-               "version" : "ee82da58e48325981af1832ab33a46de2610b29a",
+               "version" : "741f0473a4490f46e756a85f1e3b4b1dbc724d90",
                "urls" : [
                     {"url" : "https://github.com/graalvm/graal", "kind" : "git"},
                     {"url" : "https://curio.ssw.jku.at/nexus/content/repositories/snapshots", "kind" : "binary"},
@@ -20,7 +20,7 @@ suite = {
                "subdir" : True,
                # The version must be the same as the version of Truffle
                # TRUFFLE REVISION (note: this is a marker for script that can update this)
-               "version" : "ee82da58e48325981af1832ab33a46de2610b29a",
+               "version" : "741f0473a4490f46e756a85f1e3b4b1dbc724d90",
                "urls" : [
                     {"url" : "https://github.com/graalvm/graal", "kind" : "git"},
                     {"url" : "https://curio.ssw.jku.at/nexus/content/repositories/snapshots", "kind" : "binary"},
@@ -324,20 +324,6 @@ suite = {
       "spotbugsIgnoresGenerated" : True,
     },
 
-    "com.oracle.truffle.r.library.fastrGrid.server" : {
-      "sourceDirs" : ["src"],
-      "dependencies" : [
-        "com.oracle.truffle.r.library",
-      ],
-      "annotationProcessors" : [
-      ],
-      "checkstyle" : "com.oracle.truffle.r.runtime",
-      "javaCompliance" : "8+",
-      "workingSets" : "FastR",
-      "jacoco" : "include",
-
-    },
-
     "org.rosuda.javaGD" : {
       "sourceDirs" : ["src"],
       "dependencies" : [],
@@ -424,27 +410,6 @@ suite = {
       ],
       # TODO: is this intentional that we embed things from LAUNCHER_COMMON?
       "overlaps": ["sdk:LAUNCHER_COMMON"],
-    },
-
-    "GRID_DEVICE_REMOTE_SERVER" : {
-      "description" : "remote server for grid device",
-      "dependencies" : [
-        "com.oracle.truffle.r.library.fastrGrid.server",
-      ],
-      "mainClass" : "com.oracle.truffle.r.library.fastrGrid.server.RemoteDeviceServer",
-      "exclude" : [
-        "sdk:JLINE3",
-        "truffle:ANTLR4",
-        "GNUR",
-        "XZ-1.8",
-      ],
-      "distDependencies" : [
-        "truffle:TRUFFLE_API",
-        "truffle:TRUFFLE_NFI",
-        "truffle:TRUFFLE_NFI_NATIVE",
-        "sulong:SULONG_API",
-        "fastr:FASTR",
-      ],
     },
 
     "FASTR_UNIT_TESTS" : {

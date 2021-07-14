@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,7 +37,7 @@ import com.oracle.truffle.r.runtime.data.VectorDataLibrary.SeqWriteIterator;
 import com.oracle.truffle.r.runtime.ops.na.NACheck;
 
 @ExportLibrary(VectorDataLibrary.class)
-public class RStringVecNativeData implements TruffleObject {
+public class RStringVecNativeData implements TruffleObject, ShareableVectorData {
     // We need the vector, so that we can easily use the existing NativeDataAccess methods
     // TODO: this field should be replaced with address/length fields and
     // the address/length fields and logic should be removed from NativeMirror
@@ -46,8 +46,11 @@ public class RStringVecNativeData implements TruffleObject {
 
     /**
      * After nativized, the data array degenerates to a reference holder, which prevents the objects
-     * from being GC'ed. If the native code copies data of one string vector to another without
-     * using the proper API, we are doomed.
+     * from being GC'ed. This means that if someone changes the order of the CHARSXP elements on the
+     * native side, this modification is not reflected in this reference holder array.
+     *
+     * If the native code copies data of one string vector to another without using the proper API,
+     * we are doomed.
      */
     private final CharSXPWrapper[] data;
 
@@ -80,6 +83,11 @@ public class RStringVecNativeData implements TruffleObject {
 
     @ExportMessage
     public RStringVecNativeData materialize() {
+        return this;
+    }
+
+    @ExportMessage
+    public RStringVecNativeData materializeCharSXPStorage() {
         return this;
     }
 
@@ -135,17 +143,32 @@ public class RStringVecNativeData implements TruffleObject {
 
     @ExportMessage
     public String getStringAt(int index) {
-        return NativeDataAccess.getData(vec, null, index);
+        return NativeDataAccess.getData(vec, index).getContents();
     }
 
     @ExportMessage
     public String getNextString(SeqIterator it) {
-        return NativeDataAccess.getData(vec, null, it.getIndex());
+        return NativeDataAccess.getData(vec, it.getIndex()).getContents();
     }
 
     @ExportMessage
     public String getString(@SuppressWarnings("unused") RandomAccessIterator it, int index) {
-        return NativeDataAccess.getData(vec, null, index);
+        return NativeDataAccess.getData(vec, index).getContents();
+    }
+
+    @ExportMessage
+    public CharSXPWrapper getCharSXPAt(int index) {
+        return NativeDataAccess.getData(vec, index);
+    }
+
+    @ExportMessage
+    public CharSXPWrapper getNextCharSXP(SeqIterator it) {
+        return NativeDataAccess.getData(vec, it.getIndex());
+    }
+
+    @ExportMessage
+    public CharSXPWrapper getCharSXP(@SuppressWarnings("unused") RandomAccessIterator it, int index) {
+        return NativeDataAccess.getData(vec, index);
     }
 
     // Write access to the elements:
@@ -173,5 +196,20 @@ public class RStringVecNativeData implements TruffleObject {
     @ExportMessage
     public void setString(@SuppressWarnings("unused") RandomAccessWriteIterator it, int index, String value) {
         NativeDataAccess.setData(vec, data, index, CharSXPWrapper.create(value));
+    }
+
+    @ExportMessage
+    public void setCharSXPAt(int index, CharSXPWrapper value) {
+        NativeDataAccess.setData(vec, data, index, value);
+    }
+
+    @ExportMessage
+    public void setNextCharSXP(SeqWriteIterator it, CharSXPWrapper value) {
+        NativeDataAccess.setData(vec, data, it.getIndex(), value);
+    }
+
+    @ExportMessage
+    public void setCharSXP(@SuppressWarnings("unused") RandomAccessWriteIterator it, int index, CharSXPWrapper value) {
+        NativeDataAccess.setData(vec, data, index, value);
     }
 }

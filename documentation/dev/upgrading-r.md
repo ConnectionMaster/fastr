@@ -3,9 +3,10 @@
 Files where to update the version:
 * `mx.fastr/suite.py` ("GNUR" library)
 * `mx.fastr/mx_fastr.py` (function `r_version`)
-* `com.oracle.truffle.r.native/Makefile` (variable `R_VERSION`)
+* `com.oracle.truffle.r.*/**/Makefile` (variable `R_VERSION`)
 * `documentation/user/Compatibility.md`
 * `RVersionNumber` (use `R.Version()`, also update `INTERNALS_UID` from `Rinternals.h`)
+* `com.oracle.truffle.r.native/gnur/patch/*` (files like `VERSION`, `configure.ac`, etc.)
 
 Updating GNU-R sources patched by FastR (make sure you have up to date `gnur` and `master` branches):
 ```

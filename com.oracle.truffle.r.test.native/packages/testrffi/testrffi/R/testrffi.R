@@ -1,4 +1,4 @@
-# Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -364,3 +364,14 @@ rffi.serialize <- function(object) {
     .Call("serialize", object)
 }
 
+rffi.testInstallTrChar <- function(strvec, envir) {
+	.Call("testInstallTrChar", strvec, envir, PACKAGE = "testrffi")
+}
+
+rffi.test_RfMatch <- function(x, y) {
+	.Call("test_RfMatch", x, y)
+}
+
+rffi.test_mkCharDoesNotCollect <- function() {
+	.Call("test_mkCharDoesNotCollect")
+}
